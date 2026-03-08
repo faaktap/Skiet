@@ -60,3 +60,6 @@ Werner: "This is brilliant!"
 
 THE END
 Built with Node.js, JavaScript, and a touch of collaboration.
+
+Check example at.. 
+https://actlocal.co.za/skiet
