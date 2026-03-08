@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Digital Action Prop</title>
+    <style>
+        /* Base App Styling */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin: 0; background-color: #222; color: #fff; transition: background-color 0.15s ease-out; overflow-x: hidden; }
+        body.muzzle-flash { background-color: #fffacd !important; }
+
+        /* Navigation Bar */
+        .nav-bar { display: flex; justify-content: flex-end; padding: 15px 20px; background-color: #111; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .nav-btn { background: none; color: #aaa; border: 1px solid #444; padding: 8px 15px; margin-left: 10px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.2s; }
+        .nav-btn:hover, .nav-btn.active-nav { background-color: #444; color: #fff; border-color: #666; }
+
+        /* Screen Management */
+        .screen { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* The Big Red Button */
+        .activate-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; }
+        .big-red-btn { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #ff4b4b 0%, #c82333 100%); color: white; border: 10px solid #5a1017; font-size: 32px; font-weight: 900; text-transform: uppercase; cursor: pointer; box-shadow: 0 15px 35px rgba(220, 53, 69, 0.4), inset 0 -10px 20px rgba(0,0,0,0.3); transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .big-red-btn:active { transform: scale(0.95); box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4), inset 0 -5px 10px rgba(0,0,0,0.5); }
+        .big-red-btn.activated { background: radial-gradient(circle, #4cd964 0%, #28a745 100%); border-color: #124d1f; box-shadow: 0 15px 35px rgba(40, 167, 69, 0.4); }
+
+        #status { margin-top: 30px; font-size: 16px; color: #ccc; min-height: 100px; line-height: 1.6; max-width: 90%; margin-left: auto; margin-right: auto; }
+
+        /* Settings Forms */
+        select, button:not(.nav-btn):not(.big-red-btn):not(.credit-btn) { font-size: 16px; padding: 12px; margin: 5px; width: 100%; max-width: 300px; border-radius: 8px; border: 1px solid #555; background: #333; color: white; }
+        .control-group { background: #1a1a1a; padding: 20px; margin: 15px auto; max-width: 340px; border-radius: 12px; border: 1px solid #333; text-align: left; }
+        .control-group label { display: block; margin-bottom: 8px; color: #ccc; }
+        .emulate-btn { background-color: #007BFF !important; border: none !important; font-weight: bold; margin-top: 10px !important; }
+        input[type=range] { width: 100%; margin-top: 10px; accent-color: #007BFF; }
+
+        /* About Screen */
+        .about-card { background: #1a1a1a; padding: 30px; border-radius: 12px; max-width: 400px; margin: 40px auto; border: 1px solid #333; line-height: 1.6; }
+        .colab-text { margin-top: 30px; font-size: 0.9em; color: #aaa; border-top: 1px solid #333; padding-top: 20px; cursor: pointer; transition: color 0.3s; }
+        .colab-text:hover { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
+
+        /* Credits Overlay */
+        .credits-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; display: none; overflow: hidden; font-family: 'Courier New', Courier, monospace; color: #ddd; text-align: left; cursor: pointer; }
+        .credits-overlay.active-credits { display: block; }
+        .credits-buttons { position: absolute; top: 20px; right: 20px; z-index: 10000; display: flex; gap: 10px; }
+        .credit-btn { background: #222; color: #fff; border: 1px solid #555; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        .credit-btn:hover { background: #444; }
+        .credit-btn.success { background: #28a745; border-color: #28a745; color: white; }
+        .pause-hint { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.4); font-size: 14px; font-family: sans-serif; pointer-events: none; z-index: 10000; }
+        .credits-scroll-container { position: absolute; width: 90%; max-width: 600px; left: 50%; top: 50%; transform: translate(-50%, 0); animation: scrollUp 75s linear forwards; }
+        .credits-scroll-container.paused { animation-play-state: paused; }
+        .credits-scroll-container h1, .credits-scroll-container h3 { text-align: center; color: #fff; }
+        .credits-scroll-container p { margin-bottom: 20px; line-height: 1.5; }
+        .credits-scroll-container strong { color: #4cd964; }
+
+        @keyframes scrollUp { 0% { transform: translate(-50%, 0); } 100% { transform: translate(-50%, calc(-100% - 50vh)); } }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <button class="nav-btn active-nav" onclick="switchScreen('mainScreen', this)">Action</button>
+        <button class="nav-btn" onclick="switchScreen('settingsScreen', this)">Settings</button>
+        <button class="nav-btn" onclick="switchScreen('aboutScreen', this)">About</button>
+    </div>
+
+    <div id="mainScreen" class="screen active">
+        <div class="activate-container">
+            <button id="activateBtn" class="big-red-btn">Activate!</button>
+            <div id="status">Waiting for activation...</div>
+        </div>
+    </div>
+
+    <div id="settingsScreen" class="screen">
+        <h2>Configuration</h2>
+        <div class="control-group">
+            <label for="volumeSlider"><strong>Master Volume: <span id="volText">100</span>%</strong></label>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+        </div>
+
+        <div class="control-group">
+            <label><strong>Up & Down (Cock Weapon):</strong></label>
+            <select id="audioSelectY"><option value="">Loading sounds...</option></select>
+            <button class="emulate-btn" id="emulateBtnY">Emulate Up/Down</button>
+        </div>
+
+        <div class="control-group">
+            <label><strong>Left & Right (Shoot):</strong></label>
+            <select id="audioSelectX"><option value="">Loading sounds...</option></select>
+            <button class="emulate-btn" id="emulateBtnX">Emulate Left/Right</button>
+        </div>
+    </div>
+
+    <div id="aboutScreen" class="screen">
+        <div class="about-card">
+            <h2>Digital Action Prop</h2>
+            <p>Turn your phone into a physical soundboard. Select your sounds, activate the sensors, and move your device to trigger the audio and visual feedback.</p>
+            <p><strong>Up/Down:</strong> Triggers the primary "Cocking" sound.</p>
+            <p><strong>Left/Right:</strong> Triggers the secondary "Shooting" sound along with a muzzle flash.</p>
+            
+            <div class="colab-text" onclick="openCredits()">
+                <strong>Colab between Gemini & Werner (2026)</strong><br>
+                Built with Node.js, Javascript, and a bit of TV magic.<br><br>
+                <span style="font-size: 0.8em; opacity: 0.7;">👉 Click here to view the Director's Cut screenplay</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="creditsOverlay" class="credits-overlay" onclick="togglePause(event)">
+        <div class="credits-buttons">
+            <button class="credit-btn" id="copyBtn" onclick="copyScript(event)">📋 Copy Script</button>
+            <button class="credit-btn" onclick="closeCredits(event)">✖ Close</button>
+        </div>
+        <div class="pause-hint">Tap anywhere to pause/resume</div>
+        <div class="credits-scroll-container" id="creditsText">
+            <h1>🎬 The "Bones" Digital Action Prop</h1>
+            <h3>STARRING: Werner & Gemini</h3>
+            <h3>YEAR: 2026</h3>
+            <hr style="border-color: #333; margin: 30px 0;">
+            <p><strong>ACT I: The Spark</strong></p>
+            <p><strong>Werner:</strong> "Could you write me a JavaScript function that will click a button if I move a cellphone up and down?"</p>
+            <p><strong>Gemini:</strong> "Absolutely. We can use the DeviceMotion API..."</p>
+            <p><strong>ACT II: The Soundboard</strong></p>
+            <p><strong>Werner:</strong> "Great stuff! I want to put it on an HTTPS server, load MP3 files, let the user select a file..."</p>
+            <p><strong>Gemini:</strong> "I love this idea. We'll add a lightweight file scan to check your folder."</p>
+            <p><strong>ACT III: Dual Wielding</strong></p>
+            <p><strong>Werner:</strong> "I am thinking we allow the user to select two MP3 files..."</p>
+            <p><strong>Gemini:</strong> "Clever! You're turning it into a two-button instrument. I'll add the X-axis logic."</p>
+            <p><strong>ACT IV: The TV Magic Reveal</strong></p>
+            <p><strong>Werner:</strong> "I saw an episode of Bones, where Angela used a phone to emulate the sound a gun makes..."</p>
+            <p><strong>Gemini:</strong> "That is a fantastic origin story! How about we add Haptic Feedback and a CSS muzzle flash?"</p>
+            <p><strong>ACT V: Debugging & Polish</strong></p>
+            <p><strong>Werner:</strong> "Create a log file... let's save the selected sounds in localStorage. How's your CSS?"</p>
+            <p><strong>Gemini:</strong> "Let's make it a Single Page Application (SPA). Dark mode, smooth screen transitions."</p>
+            <p><strong>ACT VI: The Final Tweak</strong></p>
+            <p><strong>Werner:</strong> "Masterful! I felt the vibration now on my Android! Let's add half a second to the flash..."</p>
+            <p><strong>Gemini:</strong> "Perfectionist timing. I'll set the vibration to trigger instantly, wait exactly 50 milliseconds..."</p>
+            <p><strong>Werner:</strong> "This is brilliant!"</p>
+            <h2 style="text-align: center; margin-top: 80px; color: #fff;">THE END</h2>
+            <p style="text-align: center; margin-bottom: 50vh;">Built with Node.js, JavaScript, and a touch of collaboration.</p>
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        const DEFAULT_API_URL = 'http://localhost:61002'; //'https://actlocal.co.za/skiet';
+        // --- SCREEN NAVIGATION ---
+        function switchScreen(screenId, btnElement) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+            document.getElementById(screenId).classList.add('active');
+            btnElement.classList.add('active-nav');
+        }
+
+        // --- CREDITS LOGIC (Pause & Copy) ---
+        function openCredits() {
+            const overlay = document.getElementById('creditsOverlay');
+            const scrollText = document.getElementById('creditsText');
+            overlay.classList.add('active-credits');
+            scrollText.classList.remove('paused');
+            scrollText.style.animation = 'none';
+            setTimeout(() => { scrollText.style.animation = 'scrollUp 75s linear forwards'; }, 10);
+        }
+
+        function closeCredits(event) {
+            if (event) event.stopPropagation(); 
+            document.getElementById('creditsOverlay').classList.remove('active-credits');
+        }
+
+        function togglePause(event) {
+            if (!event.target.classList.contains('credit-btn')) {
+                document.getElementById('creditsText').classList.toggle('paused');
+            }
+        }
+
+        function copyScript(event) {
+            event.stopPropagation(); 
+            const scriptContent = `🎬 The "Bones" Digital Action Prop\nSTARRING: Werner & Gemini\nYEAR: 2026\n\nContact the developer @ ekisnommereen@gmail.com`;
+            navigator.clipboard.writeText(scriptContent).then(() => {
+                const copyBtn = document.getElementById('copyBtn');
+                copyBtn.innerText = "✅ Copied!";
+                copyBtn.classList.add('success');
+                setTimeout(() => { copyBtn.innerText = "📋 Copy Script"; copyBtn.classList.remove('success'); }, 2000);
+            }).catch(err => cl('copy','Failed to copy text: ', err));
+        }
+
+        // --- CORE LOGIC ---
+        const SHAKE_THRESHOLD = 15; 
+        const COOLDOWN_MS = 1200; 
+        let lastShakeTime = 0;
+        let isActive = false;
+        
+        const audioPlayer = document.getElementById('audioPlayer');
+        const audioSelectY = document.getElementById('audioSelectY');
+        const audioSelectX = document.getElementById('audioSelectX');
+        const statusDiv = document.getElementById('status');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volText = document.getElementById('volText');
+        const activateBtn = document.getElementById('activateBtn');
+
+        // --- NODE.JS API CALL ---
+        async function loadSounds() {
+            try {
+                const res = await smartFetch('/api/sounds');
+        
+				// CHANGED: Handle smartFetch's custom return object	
+				if (res.error) {
+					console.error("Backend Error:", res.errorMessage);
+					document.getElementById('status').innerText = "Error loading sounds.";
+					return;
+				}
+
+				const mp3Files = res.data; // Grab the array from the 'data' property
+                
+                let optionsHtml = '<option value="">-- Select an MP3 --</option>';
+                mp3Files.forEach(file => { optionsHtml += `<option value="${file}">${file}</option>`; });
+                
+                audioSelectY.innerHTML = optionsHtml;
+                audioSelectX.innerHTML = optionsHtml;
+
+                if (localStorage.getItem('savedSoundY')) audioSelectY.value = localStorage.getItem('savedSoundY');
+                if (localStorage.getItem('savedSoundX')) audioSelectX.value = localStorage.getItem('savedSoundX');
+            } catch (e) {
+                cl("loadException","Failed to load sounds", e);
+                statusDiv.innerText = "Error loading sounds. Is the Node server running?";
+            }
+        }
+        window.addEventListener('DOMContentLoaded', loadSounds);
+
+        audioSelectY.addEventListener('change', (e) => localStorage.setItem('savedSoundY', e.target.value));
+        audioSelectX.addEventListener('change', (e) => localStorage.setItem('savedSoundX', e.target.value));
+
+        function sendLog(messageText) {
+            smartFetch({task:'log'}, '/api/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: messageText, soundY: audioSelectY.value, soundX: audioSelectX.value })
+            }).catch(e => cl("Log error:", e));
+        }
+
+        volumeSlider.addEventListener('input', (e) => {
+            audioPlayer.volume = e.target.value;
+            volText.innerText = Math.round(e.target.value * 100); 
+        });
+
+        function playSound(file) {
+            if (!isActive) return; 
+            audioPlayer.src = file;
+            audioPlayer.currentTime = 0; 
+            audioPlayer.play().catch(e => sendLog("Audio play failed: " + e.message));
+        }
+
+        function triggerMovement(axis) {
+            if (!isActive) return; 
+            const now = Date.now();
+            if (now - lastShakeTime > COOLDOWN_MS) {
+                lastShakeTime = now;
+                if (axis === 'Y' && audioSelectY.value) {
+                    playSound(audioSelectY.value);
+                    sendLog("Cock motion triggered.");
+                    if (navigator.vibrate) navigator.vibrate(40);
+                } else if (axis === 'X' && audioSelectX.value) {
+                    sendLog("Shoot motion triggered.");
+                    if (navigator.vibrate) navigator.vibrate(150);
+                    setTimeout(() => {
+                        playSound(audioSelectX.value);
+                        document.body.classList.add('muzzle-flash');
+                        setTimeout(() => { document.body.classList.remove('muzzle-flash'); }, 500);
+                    }, 50); 
+                }
+            }
+        }
+
+        function handleMotion(event) {
+            const acc = event.acceleration; 
+            if (!acc) return;
+            const xMovement = Math.abs(acc.x);
+            const yMovement = Math.abs(acc.y);
+            if (xMovement > SHAKE_THRESHOLD || yMovement > SHAKE_THRESHOLD) {
+                if (yMovement > xMovement) triggerMovement('Y');
+                else triggerMovement('X');
+            }
+        }
+
+        function toggleActivation() {
+            if (isActive) {
+                isActive = false;
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+                activateBtn.innerText = "ACTIVATE!";
+                activateBtn.classList.remove('activated');
+                statusDiv.innerHTML = "Sensors deactivated. Press Activate to arm.";
+                window.removeEventListener('devicemotion', handleMotion);
+                sendLog("User disarmed the prop.");
+            } else {
+                audioPlayer.play().then(() => { audioPlayer.pause(); }).catch(e => {});
+                isActive = true;
+                activateBtn.innerText = "STOP";
+                activateBtn.classList.add('activated');
+                sendLog("User pressed Activate.");
+
+                const nameY = audioSelectY.options[audioSelectY.selectedIndex]?.text || "No sound selected";
+                const nameX = audioSelectX.options[audioSelectX.selectedIndex]?.text || "No sound selected";
+
+                statusDiv.innerHTML = `<span style="color: #4cd964; font-weight: bold; font-size: 18px;">Prop Armed!</span><br><br>🔊 <em>Ensure your device sound is turned ON.</em><br><br>↕️ <strong>Up/Down:</strong> ${nameY}<br>↔️ <strong>Left/Right:</strong> ${nameX}`;
+
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    DeviceMotionEvent.requestPermission()
+                        .then(state => {
+                            if (state === 'granted') window.addEventListener('devicemotion', handleMotion);
+                            else { activateBtn.innerText = "DENIED"; activateBtn.classList.remove('activated'); statusDiv.innerText = "Motion permission denied."; isActive = false; }
+                        }).catch(cl('someError on Permission'));
+                } else {
+                    window.addEventListener('devicemotion', handleMotion);
+                }
+            }
+        }
+
+        activateBtn.addEventListener('click', toggleActivation);
+        document.getElementById('emulateBtnY').addEventListener('click', () => triggerMovement('Y'));
+        document.getElementById('emulateBtnX').addEventListener('click', () => triggerMovement('X'));
+        
+        
+        function cl(...args) {    console.log('skiet',...args) }
+        
+        async function smartFetch(task, target, customOptions = {}, timeout = 5000) {
+            // If url is null, manually set it to the default
+            const url = `/skiet${passedUrl}`
+            cl('newFetch', url, task, customOptions)
+  
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  // 1. Automatic Token Injection
+  const token = localStorage.getItem('user_token');
+
+  const finalOptions = {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json;charset=UTF-8',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...customOptions.headers
+    },
+    body: JSON.stringify(task),
+    ...customOptions,
+    signal: controller.signal
+  }
+  cl('options ', finalOptions)
+  cl('options  headers', finalOptions.headers)
+  cl('options  body', finalOptions.body)
+  
+  const statusMessages = {    
+    400: "The request was missing some information.",
+    401: "Your session has expired. Please log in again.",
+    403: "You don't have permission to do that.",
+    404: "The requested information was not found.",
+    408: "The server is taking too long to respond.",
+    429: "Too many requests! Please slow down a bit.",
+    500: "The server is having a bad day. Please try again later.",
+    503: "The server is currently undergoing maintenance."
+  };
+
+  // Extract the loader if it exists
+  const setLoader = (status) => {
+    if (typeof customOptions.onLoading === 'function') {
+      customOptions.onLoading(status);
+    }
+  };
+
+  // Switch it ON immediately
+  setLoader(true);
+
+  try {
+    const resp = await fetch(url, finalOptions);
+    setLoader(false);
+    // 2. The 401 Auto-Cleanup
+    if (resp.status === 401) {
+      localStorage.removeItem('user_token');
+      // Optional: location.reload(); or showLoginModal();
+      return { error: 401, errorMessage: statusMessages[401], data: null };
+    }
+
+    // Handle Server Errors (404, 500, etc) 
+    if (!resp.ok) {
+      let serverMsg;
+      try { 
+        const errJson = await resp.json(); 
+        serverMsg = errJson.message || errJson.error; 
+      } catch { serverMsg = null; }
+      
+      return { 
+        error: resp.status, 
+        errorMessage: statusMessages[resp.status] || serverMsg || resp.statusText, 
+        data: null 
+      };
+    }
+
+    const result = await resp.json();
+      // 1. Identify if the server sent a "soft error" string
+      const isNoRowsString = (typeof result.error === 'string' && result.error.toLowerCase().includes('no rows'));
+
+      // 2. Normalize the data
+      // If it's a "no rows" string, we treat the data as an empty array []
+      // This makes it loop-safe for your student lists!
+      const cleanData = isNoRowsString ? [] : result;
+      //cl('after normalize', cleanData, 'original', result)
+
+      // 2a. Determine Row Count, and identifying the type of data
+      let rowCount = 0;
+      let dataType = 'unknown';
+
+      if (Array.isArray(cleanData)) {
+        dataType = 'array';
+        rowCount = cleanData.length;
+      } else if (cleanData && typeof cleanData === 'object') {
+                // If it's a single object (like your Count or a single User), that's 1 row.
+                // Unless the DB explicitly told us there are "no rows".
+                dataType = 'object';
+                rowCount = isNoRowsString ? 0 : 1;
+      } else {
+        dataType = typeof cleanData; // string, number, etc.
+      }
+
+      // 3. Determine if it's a "Hard Error"
+      // If there is an error but it's NOT the "no rows" string
+      if (result.error && !isNoRowsString && result.error !== "") {
+        return { 
+          error: result.errorcode || 'DB_ERR', 
+          errorMessage: result.error, 
+          data: result,
+          rows:0,
+          type:'error'
+        };
+      }
+
+      // 4. Success Return
+      cl('success', rowCount, 'in', dataType)
+      return { 
+        error: null, 
+        errorMessage: '', 
+        data: cleanData,
+        rowCount: rowCount,
+        type:dataType
+      };
+
+  } catch (err) {
+    const isTimeout = err.name === 'AbortError';
+    setLoader(false);
+    return { 
+      error: isTimeout ? 408 : 'NET_ERR', 
+      errorMessage: isTimeout ? statusMessages[408] : 'Network unreachable', 
+      data: null,
+      rows:0,
+      dataType: 'Exception'
+    };
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+    </script>
+</body>
+</html>

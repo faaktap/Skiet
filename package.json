@@ -1,0 +1,23 @@
+{
+  "name": "shooter",
+  "version": "1.0.1",
+  "description": "",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faaktapp/skiet.git"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "homepage": "https://actlocal.co.za/shoot",
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+
+  }
+}

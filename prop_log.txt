@@ -1,0 +1,10 @@
+[2026-03-07 21:27:10] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: User pressed Activate.
+[2026-03-07 21:27:13] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: Cock motion triggered.
+[2026-03-07 21:27:15] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: Cock motion triggered.
+
+[2026-03-07 21:47:46] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: User pressed Activate.
+[2026-03-07 21:47:52] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: ---triggerMovement(Y)
+[2026-03-07 21:47:52] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: Cock motion triggered.
+[2026-03-07 21:53:55] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: User pressed Activate.
+[2026-03-07 21:54:15] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: ---triggerMovement(Y)
+[2026-03-07 21:54:15] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: Cock motion triggered.

@@ -1,0 +1,12 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home/actlocal/nodevenv/skiet"
+PassengerBaseURI "/skiet"
+PassengerNodejs "/home/actlocal/nodevenv/nodevenv/skiet/18/bin/node"
+PassengerAppType node
+PassengerStartupFile app.mjs
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
+<IfModule Litespeed>
+SetEnv version 1.1a
+</IfModule>
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
