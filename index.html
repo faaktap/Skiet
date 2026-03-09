@@ -147,6 +147,7 @@
         const API_URL = 'http://localhost:61002'; //'https://actlocal.co.za/skiet';
         // --- SCREEN NAVIGATION ---
         function switchScreen(screenId, btnElement) {
+            sendLog(`switchScreen(${screenId}, ${btnElement})`);
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
             document.getElementById(screenId).classList.add('active');
@@ -155,6 +156,7 @@
 
         // --- CREDITS LOGIC (Pause & Copy) ---
         function openCredits() {
+            sendLog(`openCredits`);
             const overlay = document.getElementById('creditsOverlay');
             const scrollText = document.getElementById('creditsText');
             overlay.classList.add('active-credits');
@@ -164,19 +166,53 @@
         }
 
         function closeCredits(event) {
+            sendLog(`closeCredits`);
             if (event) event.stopPropagation(); 
             document.getElementById('creditsOverlay').classList.remove('active-credits');
         }
 
         function togglePause(event) {
             if (!event.target.classList.contains('credit-btn')) {
+                sendLog(`pauseCredits`);
                 document.getElementById('creditsText').classList.toggle('paused');
             }
         }
 
         function copyScript(event) {
             event.stopPropagation(); 
-            const scriptContent = `🎬 The "Bones" Digital Action Prop\nSTARRING: Werner & Gemini\nYEAR: 2026\n\nContact the developer @ ekisnommereen@gmail.com`;
+            sendLog(`CopyCredits`);
+            const scriptContent = `🎬 The "Bones" Digital Action Prop\n\n
+STARRING: Werner & Gemini
+YEAR: 2026
+
+ACT I: The Spark
+Werner: "Could you write me a JavaScript function that will click a button if I move a cellphone up and down?"
+Gemini: "Absolutely. We can use the DeviceMotion API. I'll add a 'shake threshold' so it only triggers on deliberate movements, and a 'cooldown' so you don't click the button 50 times in one second."
+
+ACT II: The Soundboard
+Werner: "Great stuff! I want to put it on an HTTPS server, load MP3 files via PHP, let the user select a file, and play it on that up/down movement."
+Gemini: "I love this idea. We'll add a lightweight PHP glob() function to scan your folder. To get around modern browsers blocking auto-play audio, we'll use a single 'Enable' button to unlock the audio engine."
+
+ACT III: Dual Wielding
+Werner: "I am thinking we allow the user to select two MP3 files. One plays when you move up and down, the other when you move left to right..."
+Gemini: "Clever! You're turning it into a two-button instrument. I'll add the X-axis logic."
+Werner: "Can we add two buttons to emulate the movement? And a volume slider. And a 'Stop Playback' button!"
+
+ACT IV: The TV Magic Reveal
+Werner: "I saw an episode of Bones, where Angela used a phone to emulate the sound a gun makes when being cocked... I thought I'd see how good you are at doing the job. You did very good!"
+Gemini: "That is a fantastic origin story! How about we add Haptic Feedback (vibration) for recoil, and a CSS screen flash for a muzzle flash?"
+Werner: "Yes—please! Like the recoil and muzzle flash idea!"
+
+ACT V: Debugging & Polish
+Werner: "Create a log file with the incoming IP so I can debug. Also, let's save the selected sounds in localStorage so they stay on refresh. How's your CSS? Let's hide the settings behind a menu and add a massive red 'ACTIVATE' button."
+Gemini: "Let's make it a Single Page Application (SPA). Dark mode, smooth screen transitions, and a big, satisfying 3D red button."
+
+ACT VI: The Final Tweak
+Werner: "Masterful! I felt the vibration now on my Android! Let's add half a second to the flash, and start the vibration 1/20th of a second before the shot."
+Gemini: "Perfectionist timing. I'll set the vibration to trigger instantly, wait exactly 50 milliseconds, and then trigger the audio and a 500ms flash."
+Werner: "This is brilliant—I'm actually scared to send the links to my friends, we might overload my server!"
+
+Contact the developer @ ekisnommereen@gmail.com`;
             navigator.clipboard.writeText(scriptContent).then(() => {
                 const copyBtn = document.getElementById('copyBtn');
                 copyBtn.innerText = "✅ Copied!";
@@ -224,6 +260,7 @@
                 if (localStorage.getItem('savedSoundX')) audioSelectX.value = localStorage.getItem('savedSoundX');
             } catch (e) {
                 cl("loadException","Failed to load sounds", e);
+                sendLog("loadException","Failed to load sounds");
                 statusDiv.innerText = "Error loading sounds. Is the Node server running?";
             }
         }

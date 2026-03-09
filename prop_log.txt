@@ -8,3 +8,20 @@
 [2026-03-07 21:53:55] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: User pressed Activate.
 [2026-03-07 21:54:15] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: ---triggerMovement(Y)
 [2026-03-07 21:54:15] IP: 127.0.0.1 | Cock: 1.mp3 | Shoot: 1.mp3 | Event: Cock motion triggered.
+[2026-03-08 20:30:29] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: User pressed Activate.
+[2026-03-08 20:33:04] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: User pressed Activate.
+[2026-03-08 20:33:04] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: switchScreen(aboutScreen, [object HTMLButtonElement])
+[2026-03-08 20:34:53] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: User pressed Activate.
+[2026-03-08 20:34:59] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: switchScreen(aboutScreen, [object HTMLButtonElement])
+[2026-03-08 20:35:03] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: openCredits
+[2026-03-08 20:35:07] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: pauseCredits
+[2026-03-08 20:35:08] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: pauseCredits
+[2026-03-08 20:35:12] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: pauseCredits
+[2026-03-08 20:35:17] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: pauseCredits
+[2026-03-08 20:35:18] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: pauseCredits
+[2026-03-08 20:35:19] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: pauseCredits
+[2026-03-08 20:35:27] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: pauseCredits
+[2026-03-08 20:35:28] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: closeCredits
+[2026-03-08 20:48:15] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: User pressed Activate.
+[2026-03-08 20:48:17] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: switchScreen(settingsScreen, [object HTMLButtonElement])
+[2026-03-08 20:48:27] IP: 127.0.0.1 | Cock: None | Shoot: None | Event: switchScreen(aboutScreen, [object HTMLButtonElement])

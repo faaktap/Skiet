@@ -94,7 +94,7 @@ function serveBasicStaticFile(res, filePath) {
     res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
     
     // Stream the file directly to the browser
-    logMe('serveBasicStaticFile','SendFile')
+    logMe('serveBasicStaticFile','createReadStream(safePath).pipe')
     createReadStream(safePath).pipe(res);
 }
 
@@ -112,17 +112,18 @@ const server = http.createServer((req, res) => {
 
 
 logMe('-------------------------------------------------------------------');
-logMe(`Launch Server - v1.1c - ${hostname},${port}`);
-logMe(`filename and __dirname', ${__dirname}, ${__filename}`);
+logMe(`Launch Server - v1.2a - ${hostname},${port}`);
+logMe(`filename = ${__filename} and __dirname = ${__dirname}`);
 logMe('-------------------------------------------------------------------');
 
 
 
 server.on('request', async (req, res) => {
-    // Parse the URL
-    // const url = new URL(req.url, `http://${req.headers.host}`);
-	 // --- PASSENGER FIX ---
-    // Strip the '/skiet' subfolder from the URL so our routes match perfectly
+    /* Parse the URL
+     const url = new URL(req.url, http://req.headers.host)
+	 --- PASSENGER FIX ---
+     Strip the '/skiet' subfolder from the URL so our routes match perfectly
+    */
     let cleanUrl = req.url;
     if (cleanUrl.startsWith(urlFront)) {
         cleanUrl = cleanUrl.slice(urlFront.length);
@@ -132,11 +133,7 @@ server.on('request', async (req, res) => {
     // Parse the CLEANED URL
     const url = new URL(cleanUrl, `http://${req.headers.host}`);
     logMe('----------------------------------------------');
-    logMe('loop',`Original: ${req.url} | Cleaned: ${url.pathname}`);
-	
-    
-	
-	logMe('loop',`Request came in ${req.method} : ${req.url} , ${url}`);
+    logMe('loop',`Original: ${req.url} | Cleaned: ${url.pathname} | method: ${req.method}`);
     // --------------------------------------
     // API ENDPOINTS
     // --------------------------------------
@@ -214,6 +211,51 @@ server.on('request', async (req, res) => {
             }
         });
         return; 
+    }
+    // 4. View Today's Logs
+    if (req.method === 'GET' && url.pathname === '/api/logs') {
+        try {
+            // Get today's filename using your existing function
+            const logFileName = getDailyLogFileName(); 
+            
+            // Read the file using await (much cleaner than callbacks!)
+            const logData = await fs.readFile(logFileName, 'utf-8');
+            
+            // Send back a nicely formatted HTML page
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            return res.end(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Server Logs</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body { background-color: #1a1a1a; color: #4cd964; font-family: 'Courier New', Courier, monospace; padding: 20px; line-height: 1.4; }
+                        h2 { color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; }
+                        pre { white-space: pre-wrap; word-wrap: break-word; }
+                    </style>
+                </head>
+                <body>
+                    <h2>📜 Logs: ${logFileName}</h2>
+                    <pre>${logData}</pre>
+                </body>
+                </html>
+            `);
+        } catch (err) {
+            // If the file doesn't exist yet (e.g., first thing in the morning)
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            return res.end(`
+                <!DOCTYPE html>
+                <html>
+                <head><style>body { background: #1a1a1a; color: #aaa; font-family: sans-serif; padding: 30px; text-align: center; }</style></head>
+                <body>
+                    <h2>No logs found for today yet!</h2>
+                    <p>File checked: ${getDailyLogFileName()}</p>
+                    <p>Go shake the prop to generate some data.</p>
+                </body>
+                </html>
+            `);
+        }
     }
 
     // --------------------------------------
